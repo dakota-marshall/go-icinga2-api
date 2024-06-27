@@ -9,7 +9,7 @@ duplicate or near duplicate defintions of structs are being defined but can be r
 be in place to ensure everything still works.
 */
 
-//ServiceStruct stores service results
+// ServiceStruct stores service results
 type ServiceStruct struct {
 	Attrs ServiceAttrs `json:"attrs"`
 	Joins struct{}     `json:"joins"`
@@ -91,6 +91,22 @@ type HostAttrs struct {
 	Vars         interface{} `json:"vars"`
 }
 
+// HostStruct is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
+type EndpointStruct struct {
+	Name  string        `json:"name"`
+	Type  string        `json:"type"`
+	Attrs EndpointAttrs `json:"attrs"`
+	Meta  struct{}      `json:"meta"`
+	Joins struct{}      `json:"stuct"`
+}
+
+// HostAttrs This is struct lists the attributes that can be set during a CreateHost call. The contents of the struct is converted into JSON
+type EndpointAttrs struct {
+	Host        string `json:"address"`
+	Port        int    `json:"port"`
+	LogDuration string `json:"log_duration"`
+}
+
 // APIResult Stores the results from NewApiRequest
 type APIResult struct {
 	Error       float64 `json:"error"`
@@ -140,7 +156,7 @@ type UserAttrs struct {
 	Email string `json:"email"`
 }
 
-//NotificationStruct stores notification results
+// NotificationStruct stores notification results
 type NotificationStruct struct {
 	Attrs NotificationAttrs `json:"attrs"`
 	Joins struct{}          `json:"joins"`
