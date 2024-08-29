@@ -172,3 +172,9 @@ type NotificationAttrs struct {
 	Vars        interface{} `json:"vars"`
 	Templates   []string    `json:"templates"`
 }
+
+type PackageStruct struct {
+	Stages      []string `json:"stages"`
+	Name        string   `json:"name"`
+	ActiveStage string   `json:"active-stage"`
+}
