@@ -30,7 +30,7 @@ jobs:
       
       - name: Get Icinga API Password
         run: |
-          echo "ICINGA2_API_PASSWORD=$(docker exec icinga2 bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | awk -F'"' '{ print $$2}')" >> $GITHUB_OUTPUT
+          echo "ICINGA2_API_PASSWORD=$(docker exec $CONTAINER_ID bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | awk -F'"' '{ print $$2}')" >> $GITHUB_OUTPUT
         id: icinga_pass
         env:
           CONTAINER_ID: ${{ steps.container_id.outputs.CONTAINER_ID }}
