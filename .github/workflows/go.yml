@@ -32,8 +32,7 @@ jobs:
         run: sleep 60s
       
       - name: Get Icinga API Password
-        run: |
-          echo "ICINGA2_API_PASSWORD=$(docker exec $CONTAINER_ID bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | awk -F'"' '{ print $2}')" >> $GITHUB_OUTPUT
+        run: docker exec $CONTAINER_ID bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | tr -d " " >> $GITHUB_OUTPUT
         id: icinga_pass
         env:
           CONTAINER_ID: ${{ steps.container_id.outputs.CONTAINER_ID }}
@@ -41,7 +40,7 @@ jobs:
       - name: Run tests
         run: go test -v -coverprofile=coverage.txt ./...
         env:
-          ICINGA_API_PASSWORD: ${{ steps.icinga_pass.outputs.ICINGA_API_PASSWORD }}
+          ICINGA_API_PASSWORD: ${{ steps.icinga_pass.outputs.password }}
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
