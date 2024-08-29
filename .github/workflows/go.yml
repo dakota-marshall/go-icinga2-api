@@ -27,6 +27,9 @@ jobs:
       - name: Get container ID
         run: echo "CONTAINER_ID=$(docker ps --format '{{.Names}}')" >> $GITHUB_OUTPUT
         id: container_id
+
+      - name: Sleep 60s for icinga to setup
+        run: sleep 60s
       
       - name: Get Icinga API Password
         run: |
