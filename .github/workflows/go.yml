@@ -32,7 +32,7 @@ jobs:
         run: sleep 60s
       
       - name: Get Icinga API Password
-        run: docker exec $CONTAINER_ID bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | tr -d " " >> $GITHUB_OUTPUT
+        run: docker exec $CONTAINER_ID bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | tr -d ' "' >> $GITHUB_OUTPUT
         id: icinga_pass
         env:
           CONTAINER_ID: ${{ steps.container_id.outputs.CONTAINER_ID }}
