@@ -25,7 +25,7 @@ jobs:
         run: go mod download
   
       - name: Get container ID
-        run: echo "CONTAINER_ID=$(docker ps --format '{{.Names}})" >> $GITHUB_OUTPUT
+        run: echo "CONTAINER_ID=$(docker ps --format '{{.Names}}')" >> $GITHUB_OUTPUT
         id: container_id
       
       - name: Get Icinga API Password
