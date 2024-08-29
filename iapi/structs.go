@@ -178,3 +178,10 @@ type PackageStruct struct {
 	Name        string   `json:"name"`
 	ActiveStage string   `json:"active-stage"`
 }
+
+type PackageStageCreateResult struct {
+	Code    int    `json:"code"`
+	Package string `json:"package"`
+	Stage   string `json:"stage"`
+	Status  string `json:"status"`
+}
