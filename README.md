@@ -2,9 +2,9 @@
 
 go-icinga2-api is a Go client library for configuring Icinga2 server via the [Icinga2 API](http://docs.icinga.org/icinga2/latest/doc/module/icinga2/chapter/icinga2-api)
 
-[![Build Status](https://travis-ci.org/lrsmith/go-icinga2-api.svg?branch=master)](https://travis-ci.org/lrsmith/go-icinga2-api)
-[![Go Report Card](https://goreportcard.com/badge/github.com/lrsmith/go-icinga2-api)](https://goreportcard.com/report/github.com/lrsmith/go-icinga2-api)
-[![codecov](https://codecov.io/gh/lrsmith/go-icinga2-api/branch/mas-aptet/graph/badge.svg)](https://codecov.io/gh/lrsmith/go-icinga2-api)
+![example workflow](https://github.com/dakota-marshall/go-icinga2-api/actions/workflows/go.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dakota-marshall/go-icinga2-api)](https://goreportcard.com/report/github.com/dakota-marshall/go-icinga2-api)
+[![codecov](https://codecov.io/github/dakota-marshall/go-icinga2-api/graph/badge.svg?token=GR42D0S3KX)](https://codecov.io/github/dakota-marshall/go-icinga2-api)
 
 
 ## Motivation
