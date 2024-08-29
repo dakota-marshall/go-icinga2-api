@@ -43,3 +43,35 @@ func (server *Server) GetPackage(packageName string) (PackageStruct, error) {
 	return correctPackage, err
 
 }
+
+// Create Package ...
+func (server *Server) CreatePackage(pkgName string) (PackageStruct, error) {
+
+	// Make the API request to create the package.
+	results, err := server.NewAPIRequest("POST", packageEndpoint+"/"+pkgName, nil)
+	if err != nil {
+		return PackageStruct{}, err
+	}
+
+	if results.Code == 200 {
+		pkg, err := server.GetPackage(pkgName)
+		return pkg, err
+	}
+
+	return PackageStruct{}, fmt.Errorf("%s", results.ErrorString)
+
+}
+
+// DeletePackage ...
+func (server *Server) DeletePackage(pkgName string) error {
+	results, err := server.NewAPIRequest("DELETE", packageEndpoint+"/"+pkgName, nil)
+	if err != nil {
+		return err
+	}
+
+	if results.Code == 200 {
+		return nil
+	}
+
+	return fmt.Errorf("%s", results.ErrorString)
+}
