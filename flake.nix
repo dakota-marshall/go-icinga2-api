@@ -22,9 +22,12 @@
 
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
+          # Needed for delve debugger to function
+          hardeningDisable = [ "fortify" ];
           packages = with pkgs; [
             # go (version is specified by overlay)
             go
+            delve
 
             # goimports, godoc, etc.
             gotools
