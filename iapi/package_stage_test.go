@@ -63,15 +63,13 @@ func TestGetPackageStage(t *testing.T) {
 	}
 
 }
+func TestGetPackageStageError(t *testing.T) {
 
-func TestDeletePackageStage(t *testing.T) {
-
-	// Delete test package
-	err := Icinga2_Server.DeletePackage(packageName)
-	if err != nil {
+	pkgStage, err := Icinga2_Server.GetPackageStage(packageName, "bad-package-stage")
+	if err == nil {
 		t.Error(err)
 	}
-	// Sleep to allow time for icinga to reload
-	time.Sleep(15 * time.Second)
-
+	if len(pkgStage) > 1 {
+		t.Error("Too many objects in slice")
+	}
 }

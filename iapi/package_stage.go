@@ -81,17 +81,3 @@ func (server *Server) CreatePackageStage(pkgName string, configFilePath string, 
 	return packageResult, fmt.Errorf("%s", results.ErrorString)
 
 }
-
-// DeletePackage ...
-// func (server *Server) DeletePackage(pkgName string) error {
-// 	results, err := server.NewAPIRequest("DELETE", packageEndpoint+"/"+pkgName, nil)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	if results.Code == 200 {
-// 		return nil
-// 	}
-//
-// 	return fmt.Errorf("%s", results.ErrorString)
-// }
