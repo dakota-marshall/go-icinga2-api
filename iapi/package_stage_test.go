@@ -2,58 +2,76 @@ package iapi
 
 import (
 	"testing"
+	"time"
 )
 
-func TestGetPackageStage(t *testing.T) {
-
-	// pkgName := "test-package-stage"
-
-	// pkg, err := Icinga2_Server.GetPackage(pkgName)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// if pkg.ActiveStage == "" {
-	// 	t.Error("Failed to get ActiveStage from package")
-	// }
-	// if pkg.Name == "" {
-	// 	t.Error("Failed to get Name from package")
-	// }
-}
+var packageName string
+var packageStageName string
+var configFilePath string
+var configData string
 
 func TestCreatePackageStage(t *testing.T) {
 
-	pkgName := "test-package-stage"
-	configFilePath := "conf.d/test-host.conf"
-	configData := "object Host \"local-host\" { address = \"127.0.0.1\", check_command = \"hostalive\" }"
+	packageName = "test-stage-package"
+	configFilePath = "conf.d/test-host.conf"
+	configData = "object Host \"local-host\" { address = \"127.0.0.1\", check_command = \"hostalive\" }"
 
 	// Create package for stage testing
-	_, err := Icinga2_Server.CreatePackage(pkgName)
+	_, err := Icinga2_Server.CreatePackage(packageName)
 	if err != nil {
 		t.Error(err)
 	}
 
-	_, err = Icinga2_Server.CreatePackageStage(pkgName, configFilePath, configData)
+	pkgStageResult, err := Icinga2_Server.CreatePackageStage(packageName, configFilePath, configData)
+	if err != nil {
+		t.Error(err)
+	}
+	packageStageName = pkgStageResult[0].Stage
+
+	// Sleep to allow time for icinga to reload
+	time.Sleep(15 * time.Second)
+
+	pkg, err := Icinga2_Server.GetPackage(packageName)
 	if err != nil {
 		t.Error(err)
 	}
 
-	_, err = Icinga2_Server.GetPackage(pkgName)
+	if pkgStageResult[0].Stage != pkg.ActiveStage {
+		t.Error("New Package is not the current stage")
+	}
+}
+
+func TestGetPackageStage(t *testing.T) {
+
+	pkgStage, err := Icinga2_Server.GetPackageStage(packageName, packageStageName)
 	if err != nil {
 		t.Error(err)
 	}
-	// TODO: Need to figure out how to ensure the config we upload becomes the active stage
-	// if config[0].Stage != pkg.ActiveStage {
-	// 	t.Error("New Package is not the current stage")
-	// }
+	if len(pkgStage) < 1 {
+		t.Error("No objects in slice")
+	}
+
+	var pathExists bool
+	pathExists = false
+	for _, file := range pkgStage {
+		if file.Name == configFilePath {
+			pathExists = true
+		}
+	}
+	if !pathExists {
+		t.Error("Couldnt find config file path in specified stage")
+	}
+
 }
 
 func TestDeletePackageStage(t *testing.T) {
 
-	pkgName := "test-package-stage"
-
 	// Delete test package
-	err := Icinga2_Server.DeletePackage(pkgName)
+	err := Icinga2_Server.DeletePackage(packageName)
 	if err != nil {
 		t.Error(err)
 	}
+	// Sleep to allow time for icinga to reload
+	time.Sleep(15 * time.Second)
+
 }

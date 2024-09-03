@@ -4,45 +4,41 @@ package iapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
 const packageStageEndpoint = "/config/stages"
 
-// func (server *Server) GetPackageStage(packageStageName string) (PackageStruct, error) {
-//
-// 	var allPackages []PackageStruct
-// 	var correctPackage PackageStruct
-//
-// 	results, err := server.NewAPIRequest("GET", packageEndpoint+"/", nil)
-// 	if err != nil {
-// 		return PackageStruct{}, err
-// 	}
-//
-// 	// Contents of the results is an interface object. Need to convert it to json first.
-// 	jsonStr, marshalErr := json.Marshal(results.Results)
-// 	if marshalErr != nil {
-// 		return PackageStruct{}, marshalErr
-// 	}
-//
-// 	// then the JSON can be pushed into the appropriate struct.
-// 	// Note : Results is a slice so much push into a slice.
-//
-// 	unmarshalErr := json.Unmarshal(jsonStr, &allPackages)
-// 	if unmarshalErr != nil {
-// 		return PackageStruct{}, unmarshalErr
-// 	}
-//
-// 	// Endpoint only ever returns all packages, so get the package we actually need
-// 	for _, pkg := range allPackages {
-// 		if pkg.Name == packageName {
-// 			correctPackage = pkg
-// 		}
-// 	}
-//
-// 	return correctPackage, err
-//
-// }
+func (server *Server) GetPackageStage(packageName string, packageStageName string) ([]PackageStageFile, error) {
+
+	var packageData []PackageStageFile
+
+	results, err := server.NewAPIRequest("GET", packageStageEndpoint+"/"+packageName+"/"+packageStageName, nil)
+	if err != nil {
+		return []PackageStageFile{}, err
+	}
+	if results.Code != 200 {
+		return []PackageStageFile{}, errors.New(results.ErrorString)
+	}
+
+	// Contents of the results is an interface object. Need to convert it to json first.
+	jsonStr, marshalErr := json.Marshal(results.Results)
+	if marshalErr != nil {
+		return []PackageStageFile{}, marshalErr
+	}
+
+	// then the JSON can be pushed into the appropriate struct.
+	// Note : Results is a slice so much push into a slice.
+
+	unmarshalErr := json.Unmarshal(jsonStr, &packageData)
+	if unmarshalErr != nil {
+		return []PackageStageFile{}, unmarshalErr
+	}
+
+	return packageData, err
+
+}
 
 // Create Package ...
 func (server *Server) CreatePackageStage(pkgName string, configFilePath string, configData string) ([]PackageStageCreateResult, error) {

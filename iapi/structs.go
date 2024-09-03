@@ -185,3 +185,8 @@ type PackageStageCreateResult struct {
 	Stage   string `json:"stage"`
 	Status  string `json:"status"`
 }
+
+type PackageStageFile struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
