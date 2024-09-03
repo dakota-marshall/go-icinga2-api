@@ -40,6 +40,35 @@ func TestCreatePackageStage(t *testing.T) {
 		t.Error("New Package is not the current stage")
 	}
 }
+func TestCreatePackageStageError(t *testing.T) {
+
+	packageNameError := "test-stage-package-error"
+	configFilePathError := "conf.d/test-host.conf"
+	configDataError := "objec Host \"local-host\" { address = \"127.0.0.1\", check_command = \"hostalive\" }"
+
+	// Create package for stage testing
+	_, err := Icinga2_Server.CreatePackage(packageNameError)
+	if err != nil {
+		t.Error(err)
+	}
+
+	pkgStageResult, err := Icinga2_Server.CreatePackageStage(packageNameError, configFilePathError, configDataError)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Sleep to allow time for icinga to reload
+	time.Sleep(15 * time.Second)
+
+	pkg, err := Icinga2_Server.GetPackage(packageNameError)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if pkgStageResult[0].Stage == pkg.ActiveStage {
+		t.Error("New Package the current stage")
+	}
+}
 
 func TestGetPackageStage(t *testing.T) {
 
