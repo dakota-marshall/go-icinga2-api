@@ -92,9 +92,19 @@ func TestGetPackageStage(t *testing.T) {
 	}
 
 }
-func TestGetPackageStageError(t *testing.T) {
+func TestGetPackageStageBadStage(t *testing.T) {
 
 	pkgStage, err := Icinga2_Server.GetPackageStage(packageName, "bad-package-stage")
+	if err == nil {
+		t.Error(err)
+	}
+	if len(pkgStage) > 1 {
+		t.Error("Too many objects in slice")
+	}
+}
+func TestGetPackageStageInvalidCharacter(t *testing.T) {
+
+	pkgStage, err := Icinga2_Server.GetPackageStage(packageName, "stage&&$$!!__")
 	if err == nil {
 		t.Error(err)
 	}

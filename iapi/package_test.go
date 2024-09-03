@@ -2,6 +2,7 @@ package iapi
 
 import (
 	"testing"
+	"time"
 )
 
 func TestGetPackage(t *testing.T) {
@@ -32,6 +33,7 @@ func TestCreatePackage(t *testing.T) {
 	if pkg.Name != pkgName {
 		t.Error("Package name does not match requested package")
 	}
+	time.Sleep(15 * time.Second)
 }
 
 func TestDeletePackage(t *testing.T) {
@@ -42,4 +44,5 @@ func TestDeletePackage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	time.Sleep(15 * time.Second)
 }
