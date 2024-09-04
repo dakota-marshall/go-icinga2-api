@@ -91,16 +91,16 @@ type HostAttrs struct {
 	Vars         interface{} `json:"vars"`
 }
 
-// HostStruct is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
+// EndpointStruct is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
 type EndpointStruct struct {
-	Name  string        `json:"name"`
-	Type  string        `json:"type"`
-	Attrs EndpointAttrs `json:"attrs"`
-	Meta  struct{}      `json:"meta"`
-	Joins struct{}      `json:"stuct"`
+	Name    string        `json:"name"`
+	Package PackageStruct `json:"package"`
+	Path    string        `json:"path"`
+	RawData string        `json:"rawData"`
+	Stage   string        `json:"stage"`
+	Attrs   EndpointAttrs `json:"attrs"`
 }
 
-// HostAttrs This is struct lists the attributes that can be set during a CreateHost call. The contents of the struct is converted into JSON
 type EndpointAttrs struct {
 	Host        string `json:"address"`
 	Port        int    `json:"port"`
