@@ -114,6 +114,7 @@ type APIResult struct {
 	Status      string      `json:"Status"`
 	Code        int         `json:"Code"`
 	Results     interface{} `json:"results"`
+	Retries     int         `json:"Retries"`
 }
 
 // FileResult Stores the results from NewFileRequest
