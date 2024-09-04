@@ -5,26 +5,49 @@ import (
 	"strconv"
 )
 
-// func (server *Server) GetEndpoint(endpoint string) ([]EndpointStruct, error) {
-//
-// 	var endpoints []EndpointStruct
-//
-// 	// Contents of the results is an interface object. Need to convert it to json first.
-// 	jsonStr, marshalErr := json.Marshal(results.Results)
-// 	if marshalErr != nil {
-// 		return nil, marshalErr
-// 	}
-//
-// 	// then the JSON can be pushed into the appropriate struct.
-// 	// Note : Results is a slice so much push into a slice.
-//
-// 	if unmarshalErr := json.Unmarshal(jsonStr, &endpoints); unmarshalErr != nil {
-// 		return nil, unmarshalErr
-// 	}
-//
-// 	return endpoints, err
-//
-// }
+// Endpoints are created via the Package API, these are configured on the server via static config files
+
+func (server *Server) GetEndpoint(endpointName string, packageName string) (EndpointStruct, error) {
+
+	var endpoint EndpointStruct
+	endpoint.Name = endpointName
+	endpoint.Path = "conf.d/" + endpointName + ".conf"
+	// endpoint.Attrs = ""
+
+	// Get package data
+	pkgResult, err := server.GetPackage(packageName)
+	if err != nil {
+		return EndpointStruct{}, err
+	}
+
+	endpoint.Package = pkgResult
+	endpoint.Stage = endpoint.Package.ActiveStage
+
+	// Check if path is in package active stage
+	stageResult, err := server.GetPackageStage(packageName, endpoint.Stage)
+	if err != nil {
+		return EndpointStruct{}, err
+	}
+	var pathExists bool
+	for _, file := range stageResult {
+		if endpoint.Path == file.Name {
+			pathExists = true
+		}
+	}
+	if !pathExists {
+		return EndpointStruct{}, fmt.Errorf("path " + endpoint.Path + " does not exist in provided package")
+	}
+
+	// Get rawdata from package stage
+	fileResult, err := server.GetPackageStageFile(packageName, endpoint.Package.ActiveStage, endpoint.Path)
+	if err != nil {
+		return EndpointStruct{}, err
+	}
+	endpoint.RawData = fileResult
+
+	return endpoint, err
+
+}
 
 // Create Endpoint ...
 func (server *Server) CreateEndpoint(name string, host string, port int, logDuration string, packageName string) (EndpointStruct, error) {
@@ -52,7 +75,9 @@ func (server *Server) CreateEndpoint(name string, host string, port int, logDura
 	newEndpoint.Path = "conf.d/" + name + ".conf"
 
 	// Create config file from attrs
-	newEndpoint.RawData = fmt.Sprintf("object Endpoint \"%s\" { host = \"%s\", port = \"%s\", log_duration = \"%s\" }",
+	newEndpoint.RawData = fmt.Sprintf("object Zone \"%s\" { parent = \"master\", endpoints = [ \"%s\" ] }\n object Endpoint \"%s\" { host = \"%s\", port = \"%s\", log_duration = \"%s\" }",
+		newEndpoint.Name,
+		newEndpoint.Name,
 		newEndpoint.Name,
 		newEndpoint.Attrs.Host,
 		strconv.Itoa(newEndpoint.Attrs.Port),

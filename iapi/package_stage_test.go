@@ -40,6 +40,17 @@ func TestCreatePackageStage(t *testing.T) {
 		t.Error("New Package is not the current stage")
 	}
 }
+func TestGetPackageStageFile(t *testing.T) {
+
+	result, err := Icinga2_Server.GetPackageStageFile(packageName, packageStageName, configFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+	if configData != result {
+		t.Error(err)
+	}
+
+}
 func TestCreatePackageStageError(t *testing.T) {
 
 	packageNameError := "test-stage-package-error"

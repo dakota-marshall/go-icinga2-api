@@ -116,6 +116,15 @@ type APIResult struct {
 	Results     interface{} `json:"results"`
 }
 
+// FileResult Stores the results from NewFileRequest
+type FileResult struct {
+	Error       float64 `json:"error"`
+	ErrorString string
+	Status      string `json:"Status"`
+	Code        int    `json:"Code"`
+	Result      string `json:"results"`
+}
+
 // APIStatus stores the results of an Icinga2 API Status Call
 type APIStatus struct {
 	Results []struct {

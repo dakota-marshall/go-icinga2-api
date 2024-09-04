@@ -7,26 +7,6 @@ import (
 	"time"
 )
 
-// func TestGetValidEndpoint(t *testing.T) {
-//
-// 	name := "c1-mysql-1"
-//
-// 	_, err := Icinga2_Server.GetEndpoint(name)
-//
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
-//
-// func TestGetInvalidEndpoint(t *testing.T) {
-//
-// 	name := "c2-mysql-1"
-// 	_, err := Icinga2_Server.GetEndpoint(name)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
-
 func TestCreateEndpointRawDataDefaultValues(t *testing.T) {
 
 	name := "endpoint-raw-data-default"
@@ -34,7 +14,9 @@ func TestCreateEndpointRawDataDefaultValues(t *testing.T) {
 	port := 5665
 	// packageName := "endpoint-raw-data-default-endpoint"
 	logDuration := "1d"
-	expectedRawData := fmt.Sprintf("object Endpoint \"%s\" { host = \"%s\", port = \"%s\", log_duration = \"%s\" }",
+	expectedRawData := fmt.Sprintf("object Zone \"%s\" { parent = \"master\", endpoints = [ \"%s\" ] }\n object Endpoint \"%s\" { host = \"%s\", port = \"%s\", log_duration = \"%s\" }",
+		name,
+		name,
 		name,
 		host,
 		strconv.Itoa(port),
@@ -62,8 +44,10 @@ func TestCreateEndpointRawDataCustomValues(t *testing.T) {
 	host := "127.0.0.2"
 	port := 5665
 	packageName := "endpoint-raw-data-custom-test"
-	logDuration := "3d"
-	expectedRawData := fmt.Sprintf("object Endpoint \"%s\" { host = \"%s\", port = \"%s\", log_duration = \"%s\" }",
+	logDuration := "40000"
+	expectedRawData := fmt.Sprintf("object Zone \"%s\" { parent = \"master\", endpoints = [ \"%s\" ] }\n object Endpoint \"%s\" { host = \"%s\", port = \"%s\", log_duration = \"%s\" }",
+		name,
+		name,
 		name,
 		host,
 		strconv.Itoa(port),
@@ -112,22 +96,35 @@ func TestCreateEndpointVerifyStage(t *testing.T) {
 	}
 
 }
+func TestGetValidEndpoint(t *testing.T) {
 
-//
-// func TestDeleteEndpoint(t *testing.T) {
-//
-// 	name := "go-icinga2-api-1"
-//
-// 	err := Icinga2_Server.DeleteEndpoint(name)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
-//
-// func TestDeleteEndpointDNE(t *testing.T) {
-// 	name := "go-icinga2-api-1"
-// 	err := Icinga2_Server.DeleteEndpoint(name)
-// 	if err.Error() != "No objects found." {
-// 		t.Error(err)
-// 	}
-// }
+	name := "endpoint-raw-data-custom-values"
+	packageName := "endpoint-raw-data-custom-test"
+
+	_, err := Icinga2_Server.GetEndpoint(name, packageName)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetInvalidEndpoint(t *testing.T) {
+
+	name := "c2-mysql-1"
+	packageName := "bad-package"
+
+	_, err := Icinga2_Server.GetEndpoint(name, packageName)
+	if err == nil {
+		t.Error(err)
+	}
+}
+
+func TestDeleteEndpoint(t *testing.T) {
+
+	packageName := "test-endpoint-package2"
+
+	err := Icinga2_Server.DeletePackage(packageName)
+	if err != nil {
+		t.Error(err)
+	}
+	time.Sleep(15 * time.Second)
+}

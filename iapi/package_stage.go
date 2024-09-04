@@ -9,6 +9,7 @@ import (
 )
 
 const packageStageEndpoint = "/config/stages"
+const packageStageFileEndpoint = "/config/files"
 
 func (server *Server) GetPackageStage(packageName string, packageStageName string) ([]PackageStageFile, error) {
 
@@ -79,5 +80,19 @@ func (server *Server) CreatePackageStage(pkgName string, configFilePath string, 
 	}
 
 	return packageResult, fmt.Errorf("%s", results.ErrorString)
+
+}
+
+func (server *Server) GetPackageStageFile(packageName string, packageStageName string, filePath string) (string, error) {
+
+	results, err := server.NewFileRequest("GET", packageStageFileEndpoint+"/"+packageName+"/"+packageStageName+"/"+filePath, nil)
+	if err != nil {
+		return "", err
+	}
+	if results.Code != 200 {
+		return "", errors.New(results.ErrorString)
+	}
+
+	return results.Result, err
 
 }

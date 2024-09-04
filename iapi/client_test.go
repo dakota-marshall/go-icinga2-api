@@ -7,6 +7,8 @@ import (
 
 var ICINGA2_API_PASSWORD = os.Getenv("ICINGA2_API_PASSWORD")
 
+// var ICINGA2_API_PASSWORD = "1e231a26c725f6ed"
+
 var Icinga2_Server = Server{"root", ICINGA2_API_PASSWORD, "https://127.0.0.1:5665/v1", true, nil}
 
 //var Icinga2_Server = Server{"icinga-test", "icinga", "https://127.0.0.1:5665/v1", true, nil}
@@ -45,6 +47,14 @@ func TestNewAPIRequest(t *testing.T) {
 	result, _ := Icinga2_Server.NewAPIRequest("GET", "/status", nil)
 
 	if result.Code != 200 {
+		t.Errorf("%s", result.Status)
+	}
+}
+func TestNewFileRequestError(t *testing.T) {
+
+	result, _ := Icinga2_Server.NewFileRequest("GET", "/config/files/bad-package/bad-stage", nil)
+
+	if result.Code == 200 {
 		t.Errorf("%s", result.Status)
 	}
 }
