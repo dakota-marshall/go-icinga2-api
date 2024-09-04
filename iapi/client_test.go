@@ -48,6 +48,14 @@ func TestNewAPIRequest(t *testing.T) {
 		t.Errorf("%s", result.Status)
 	}
 }
+func TestNewFileRequestError(t *testing.T) {
+
+	result, _ := Icinga2_Server.NewFileRequest("GET", "/config/files/bad-package/bad-stage", nil)
+
+	if result.Code == 200 {
+		t.Errorf("%s", result.Status)
+	}
+}
 
 func TestConnectServerBadURINoVersion(t *testing.T) {
 
