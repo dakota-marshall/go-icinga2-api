@@ -73,6 +73,19 @@ func TestNewAPIRequestServerUnavailable(t *testing.T) {
 	}
 }
 
+func TestNewAPIRequestServerUnavailable(t *testing.T) {
+
+	var Icinga2_Server = Server{"icinga-test", "icinga", "https://127.0.0.1:4665/v1", true, 5, 0, nil}
+	result, err := Icinga2_Server.NewAPIRequest("GET", "/status", nil)
+
+	if err == nil {
+		t.Errorf("Error : Did not get error connecting to unavailable server.")
+	}
+	if result.Retries != 5 {
+		t.Errorf("Error : Did not get error connecting to unavailable server before 5 retries.")
+	}
+}
+
 func TestConnectServerBadURINoVersion(t *testing.T) {
 
 	var Icinga2_Server = Server{"root", ICINGA2_API_PASSWORD, "https://127.0.0.1:5665", true, 0, 0, nil}

@@ -30,7 +30,7 @@ func (server *Server) Config(username, password, url string, allowUnverifiedSSL 
 	return &Server{username, password, url, allowUnverifiedSSL, retries, retryDelay, nil}, nil
 }
 
-func (server *Server) Connect() (error, int) {
+func (server *Server) doRequest(method, fullURL string, body io.Reader) (*http.Response, error, int) {
 
 	t := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -42,70 +42,25 @@ func (server *Server) Connect() (error, int) {
 		Transport: t,
 		Timeout:   time.Second * 60,
 	}
-
-	var err error
-	request, err := http.NewRequest("GET", server.BaseURL, nil)
-	if err != nil {
-		server.httpClient = nil
+ 
+	var bodyBytes []byte
+	if body != nil {
+		bodyBytes, _ = io.ReadAll(body)
 	}
-
-	request.SetBasicAuth(server.Username, server.Password)
-	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Content-Type", "application/json")
-
-	var response *http.Response
-	retries := 0
-	for {
-		response, err = server.httpClient.Do(request)
-
-		if !((err != nil) || (response == nil || response.StatusCode == 503)) {
-			break
-		}
-		if retries >= server.Retries {
-			break
-		}
-		retries++
-		time.Sleep(server.RetryDelay)
-	}
-	if (err != nil) || (response == nil || response.StatusCode == 503) {
-		server.httpClient = nil
-		return err, retries
-	}
-
-	defer response.Body.Close()
-
-	return nil, retries
-}
-
-// NewAPIRequest ...
-func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (*APIResult, error) {
-
-	fullURL := server.BaseURL + APICall
-
-	t := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: server.AllowUnverifiedSSL,
-		},
-	}
-
-	server.httpClient = &http.Client{
-		Transport: t,
-		Timeout:   time.Second * 60,
-	}
-
-	request, requestErr := http.NewRequest(method, fullURL, bytes.NewBuffer(jsonString))
-	if requestErr != nil {
-		return nil, requestErr
-	}
-
-	request.SetBasicAuth(server.Username, server.Password)
-	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Content-Type", "application/json")
 
 	var response *http.Response
 	var doErr error
 	retries := 0
 	for {
+		request, requestErr := http.NewRequest(method, fullURL, io.NopCloser(bytes.NewBuffer(bodyBytes)))
+		if requestErr != nil {
+			return nil, requestErr, retries
+		}
+
+		request.SetBasicAuth(server.Username, server.Password)
+		request.Header.Set("Accept", "application/json")
+		request.Header.Set("Content-Type", "application/json")
+
 		response, doErr = server.httpClient.Do(request)
 
 		if !((doErr != nil) || (response == nil || response.StatusCode == 503)) {
@@ -118,6 +73,28 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 		retries++
 		time.Sleep(server.RetryDelay)
 	}
+
+	return response, doErr, retries
+}
+
+func (server *Server) Connect() (error, int) {
+
+	response, doErr, retries := server.doRequest("GET", server.BaseURL, nil)
+
+	if (doErr != nil) || (response == nil || response.StatusCode == 503) {
+		server.httpClient = nil
+		return doErr, retries
+	}
+
+	defer response.Body.Close()
+
+	return nil, retries
+}
+
+// NewAPIRequest ...
+func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (*APIResult, error) {
+
+	response, doErr, retries := server.doRequest(method, server.BaseURL+APICall, bytes.NewBuffer(jsonString))
 
 	if doErr != nil {
 		results := APIResult{
@@ -138,7 +115,6 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 	if results.Retries == 0 { // results.Retries have default value so set it.
 		results.Retries = retries
 	}
-
 	if results.Code == 0 { // results.Code has default value so set it.
 		results.Code = response.StatusCode
 	}
@@ -160,6 +136,12 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 		//results.ErrorString = strings.Replace(theError, "Error: ", "", -1)
 
 	}
+
+	resultBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	results.Result = string(resultBytes)
 
 	return &results, nil
 
@@ -202,7 +184,7 @@ func (server *Server) NewFileRequest(method, APICall string, jsonString []byte) 
 	defer response.Body.Close()
 
 	var results FileResult
-
+  
 	if results.Code == 0 { // results.Code has default value so set it.
 		results.Code = response.StatusCode
 	}
