@@ -91,6 +91,22 @@ type HostAttrs struct {
 	Vars         interface{} `json:"vars"`
 }
 
+// EndpointStruct is a struct used to store results from an Icinga2 Host API Call. The content are also used to generate the JSON for the CreateHost call
+type EndpointStruct struct {
+	Name    string        `json:"name"`
+	Package PackageStruct `json:"package"`
+	Path    string        `json:"path"`
+	RawData string        `json:"rawData"`
+	Stage   string        `json:"stage"`
+	Attrs   EndpointAttrs `json:"attrs"`
+}
+
+type EndpointAttrs struct {
+	Host        string `json:"address"`
+	Port        int    `json:"port"`
+	LogDuration string `json:"log_duration"`
+}
+
 // APIResult Stores the results from NewApiRequest
 type APIResult struct {
 	Error       float64 `json:"error"`
@@ -99,6 +115,15 @@ type APIResult struct {
 	Code        int         `json:"Code"`
 	Results     interface{} `json:"results"`
 	Retries     int         `json:"Retries"`
+}
+
+// FileResult Stores the results from NewFileRequest
+type FileResult struct {
+	Error       float64 `json:"error"`
+	ErrorString string
+	Status      string `json:"Status"`
+	Code        int    `json:"Code"`
+	Result      string `json:"results"`
 }
 
 // APIStatus stores the results of an Icinga2 API Status Call
@@ -156,4 +181,22 @@ type NotificationAttrs struct {
 	Interval    int         `json:"interval"`
 	Vars        interface{} `json:"vars"`
 	Templates   []string    `json:"templates"`
+}
+
+type PackageStruct struct {
+	Stages      []string `json:"stages"`
+	Name        string   `json:"name"`
+	ActiveStage string   `json:"active-stage"`
+}
+
+type PackageStageCreateResult struct {
+	Code    int    `json:"code"`
+	Package string `json:"package"`
+	Stage   string `json:"stage"`
+	Status  string `json:"status"`
+}
+
+type PackageStageFile struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
 }

@@ -51,6 +51,27 @@ func TestNewAPIRequest(t *testing.T) {
 		t.Errorf("%s", result.Status)
 	}
 }
+func TestNewFileRequestError(t *testing.T) {
+
+	result, _ := Icinga2_Server.NewFileRequest("GET", "/config/files/bad-package/bad-stage", nil)
+
+	if result.Code == 200 {
+		t.Errorf("%s", result.Status)
+	}
+}
+
+func TestNewAPIRequestServerUnavailable(t *testing.T) {
+
+	var Icinga2_Server = Server{"icinga-test", "icinga", "https://127.0.0.1:4665/v1", true, 5, 0, nil}
+	result, err := Icinga2_Server.NewAPIRequest("GET", "/status", nil)
+
+	if err == nil {
+		t.Errorf("Error : Did not get error connecting to unavailable server.")
+	}
+	if result.Retries != 5 {
+		t.Errorf("Error : Did not get error connecting to unavailable server before 5 retries.")
+	}
+}
 
 func TestNewAPIRequestServerUnavailable(t *testing.T) {
 

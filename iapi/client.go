@@ -42,7 +42,7 @@ func (server *Server) doRequest(method, fullURL string, body io.Reader) (*http.R
 		Transport: t,
 		Timeout:   time.Second * 60,
 	}
-
+ 
 	var bodyBytes []byte
 	if body != nil {
 		bodyBytes, _ = io.ReadAll(body)
@@ -115,7 +115,6 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 	if results.Retries == 0 { // results.Retries have default value so set it.
 		results.Retries = retries
 	}
-
 	if results.Code == 0 { // results.Code has default value so set it.
 		results.Code = response.StatusCode
 	}
@@ -137,6 +136,82 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 		//results.ErrorString = strings.Replace(theError, "Error: ", "", -1)
 
 	}
+
+	resultBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	results.Result = string(resultBytes)
+
+	return &results, nil
+
+}
+
+// API File request for the config packages file endpoint
+func (server *Server) NewFileRequest(method, APICall string, jsonString []byte) (*FileResult, error) {
+
+	fullURL := server.BaseURL + APICall
+
+	t := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: server.AllowUnverifiedSSL,
+		},
+	}
+
+	server.httpClient = &http.Client{
+		Transport: t,
+		Timeout:   time.Second * 60,
+	}
+
+	request, requestErr := http.NewRequest(method, fullURL, bytes.NewBuffer(jsonString))
+	if requestErr != nil {
+		return nil, requestErr
+	}
+
+	request.SetBasicAuth(server.Username, server.Password)
+	request.Header.Set("Accept", "application/octet-stream")
+	request.Header.Set("Content-Type", "application/json")
+
+	response, doErr := server.httpClient.Do(request)
+	if doErr != nil {
+		results := FileResult{
+			Code:        0,
+			Status:      "Error : Request to server failed : " + doErr.Error(),
+			ErrorString: doErr.Error(),
+		}
+		return &results, doErr
+	}
+	defer response.Body.Close()
+
+	var results FileResult
+  
+	if results.Code == 0 { // results.Code has default value so set it.
+		results.Code = response.StatusCode
+	}
+
+	if results.Status == "" { // results.Status has default value, so set it.
+		results.Status = response.Status
+	}
+
+	switch results.Code {
+	case 0:
+		results.ErrorString = "Did not get a response code."
+	case 404:
+		results.ErrorString = results.Status
+	case 200:
+		results.ErrorString = results.Status
+	default:
+		results.ErrorString = results.Status
+		//theError := strings.Replace(results.Results.([]interface{})[0].(map[string]interface{})["errors"].([]interface{})[0].(string), "\n", " ", -1)
+		//results.ErrorString = strings.Replace(theError, "Error: ", "", -1)
+
+	}
+
+	resultBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	results.Result = string(resultBytes)
 
 	return &results, nil
 

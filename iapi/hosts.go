@@ -33,7 +33,7 @@ func (server *Server) GetHost(hostname string) ([]HostStruct, error) {
 }
 
 // CreateHost ...
-func (server *Server) CreateHost(hostname, address, address6 string, checkCommand string, variables map[string]string, templates []string, groups []string) ([]HostStruct, error) {
+func (server *Server) CreateHost(hostname, address, address6 string, checkCommand string, variables map[string]interface{}, templates []string, groups []string) ([]HostStruct, error) {
 
 	var newAttrs HostAttrs
 	newAttrs.Address = address

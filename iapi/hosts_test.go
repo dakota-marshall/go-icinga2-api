@@ -55,10 +55,11 @@ func TestCreateHostWithVariables(t *testing.T) {
 	IPAddress := "127.0.0.3"
 	CheckCommand := "hostalive"
 
-	variables := make(map[string]string)
+	variables := make(map[string]interface{})
 
 	variables["vars.os"] = "Linux"
 	variables["vars.creator"] = "Terraform"
+	variables["vars.urls"] = []string{"test-url1.example.com", "test-url2.example.com"}
 
 	_, err := Icinga2_Server.CreateHost(hostname, IPAddress, "", CheckCommand, variables, nil, nil)
 	if err != nil {
