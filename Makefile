@@ -10,10 +10,15 @@ docker_get_root_password:
 docker_reset:
 	make docker_clean
 	make docker_start
+	make set_env
 
 docker_clean:
 	docker stop icinga2
 	docker rm icinga2
+
+set_env:
+	$(eval password:=$(shell docker exec icinga2 bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | awk -F'"' '{ print $$2}' ))
+	echo "ICINGA2_API_PASSWORD=$(password)" > .env
 
 test:
 	$(eval password:=$(shell docker exec icinga2 bash -c 'grep password /etc/icinga2/conf.d/api-users.conf' | awk -F'"' '{ print $$2}' ))
