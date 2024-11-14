@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -42,7 +43,7 @@ func (server *Server) doRequest(method, fullURL string, body io.Reader) (*http.R
 		Transport: t,
 		Timeout:   time.Second * 60,
 	}
- 
+
 	var bodyBytes []byte
 	if body != nil {
 		bodyBytes, _ = io.ReadAll(body)
@@ -71,6 +72,8 @@ func (server *Server) doRequest(method, fullURL string, body io.Reader) (*http.R
 			break
 		}
 		retries++
+		log.Printf("Request to %s failed, retrying", fullURL)
+		// This might not be working correctly
 		time.Sleep(server.RetryDelay)
 	}
 
@@ -108,8 +111,15 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 	defer response.Body.Close()
 
 	var results APIResult
-	if decodeErr := json.NewDecoder(response.Body).Decode(&results); decodeErr != nil {
-		return nil, decodeErr
+	results.Code = response.StatusCode
+	results.Status = response.Status
+	results.ErrorString = ""
+	results.Retries = retries
+
+	//Decode response body into Results
+	decodeErr := json.NewDecoder(response.Body).Decode(&results)
+	if decodeErr != nil {
+		return &results, decodeErr
 	}
 
 	if results.Retries == 0 { // results.Retries have default value so set it.
@@ -137,11 +147,12 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 
 	}
 
-	resultBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	results.Result = string(resultBytes)
+	// resultBytes, err := io.ReadAll(response.Body)
+	// fmt.Println(string(resultBytes))
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// results.Results = string(resultBytes)
 
 	return &results, nil
 
@@ -163,16 +174,31 @@ func (server *Server) NewFileRequest(method, APICall string, jsonString []byte) 
 		Timeout:   time.Second * 60,
 	}
 
-	request, requestErr := http.NewRequest(method, fullURL, bytes.NewBuffer(jsonString))
-	if requestErr != nil {
-		return nil, requestErr
+	var response *http.Response
+	var doErr error
+	retries := 0
+	for {
+		request, requestErr := http.NewRequest(method, fullURL, io.NopCloser(bytes.NewBuffer(jsonString)))
+		if requestErr != nil {
+			return nil, requestErr
+		}
+
+		request.SetBasicAuth(server.Username, server.Password)
+		request.Header.Set("Accept", "application/octet-stream")
+		request.Header.Set("Content-Type", "application/json")
+
+		response, doErr = server.httpClient.Do(request)
+
+		if !((doErr != nil) || (response == nil || response.StatusCode == 503)) {
+			break
+		}
+
+		if retries >= server.Retries {
+			break
+		}
+		retries++
+		time.Sleep(server.RetryDelay)
 	}
-
-	request.SetBasicAuth(server.Username, server.Password)
-	request.Header.Set("Accept", "application/octet-stream")
-	request.Header.Set("Content-Type", "application/json")
-
-	response, doErr := server.httpClient.Do(request)
 	if doErr != nil {
 		results := FileResult{
 			Code:        0,
@@ -183,8 +209,12 @@ func (server *Server) NewFileRequest(method, APICall string, jsonString []byte) 
 	}
 	defer response.Body.Close()
 
-	var results FileResult
-  
+	results := FileResult{
+		Code:        response.StatusCode,
+		Status:      response.Status,
+		ErrorString: "",
+	}
+
 	if results.Code == 0 { // results.Code has default value so set it.
 		results.Code = response.StatusCode
 	}

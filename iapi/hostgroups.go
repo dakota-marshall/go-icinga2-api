@@ -25,14 +25,14 @@ func (server *Server) GetHostgroup(name string) ([]HostgroupStruct, error) {
 	// Contents of the results is an interface object. Need to convert it to json first.
 	jsonStr, err := json.Marshal(results.Results)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to unmarshal hostgroup data: %s", jsonStr)
 	}
 
 	// then the JSON can be pushed into the appropriate struct.
 	// Note : Results is a slice so much push into a slice.
 	var hostgroups []HostgroupStruct
 	if err := json.Unmarshal(jsonStr, &hostgroups); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to unmarshal hostgroup data: %s \n%#v", jsonStr, results)
 	}
 
 	if len(hostgroups) == 0 {
