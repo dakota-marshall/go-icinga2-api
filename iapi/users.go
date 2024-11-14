@@ -61,6 +61,29 @@ func (server *Server) CreateUser(name, email string) ([]UserStruct, error) {
 	return nil, fmt.Errorf("%s", results.ErrorString)
 }
 
+func (server *Server) UpdateUser(user UserStruct) ([]UserStruct, error) {
+	// Create JSON from completed struct
+	payloadJSON, marshalErr := json.Marshal(map[string]interface{}{
+		"attrs": user.Attrs,
+	})
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	// Make the API request to create the users.
+	results, err := server.NewAPIRequest("POST", "/objects/users/"+user.Name, []byte(payloadJSON))
+	if err != nil {
+		return nil, err
+	}
+
+	if results.Code == 200 {
+		users, err := server.GetUser(user.Name)
+		return users, err
+	}
+
+	return nil, fmt.Errorf("%s", results.ErrorString)
+}
+
 // DeleteUser ...
 func (server *Server) DeleteUser(name string) error {
 	results, err := server.NewAPIRequest("DELETE", "/objects/users/"+name+"?cascade=1", nil)
