@@ -73,6 +73,55 @@ func TestCreateHostWithVariables(t *testing.T) {
 	}
 }
 
+func TestUpdateHost(t *testing.T) {
+
+	hostname := "go-icinga2-api-5"
+	IPAddress := "127.0.0.4"
+	CheckCommand := "hostalive"
+
+	variables := make(map[string]interface{})
+
+	variables["vars.os"] = "Linux"
+	variables["vars.creator"] = "Terraform"
+	variables["vars.urls"] = []string{"test-url2.example.com", "test-url3.example.com"}
+
+	_, err := Icinga2_Server.CreateHost(hostname, IPAddress, "", CheckCommand, variables, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	variables["vars.urls"] = []string{"test-url4.example.com", "test-url5.example.com"}
+
+	updateHost := HostStruct{
+		Name: hostname,
+		Type: "Host",
+		Attrs: HostAttrs{
+			ActionURL:    "",
+			Address:      "127.0.0.1",
+			Address6:     "::1",
+			CheckCommand: "hostalive",
+			DisplayName:  "go-icinga2-api-5",
+			Groups:       []string{},
+			Notes:        "",
+			NotesURL:     "",
+			Templates:    []string{},
+			Vars:         variables,
+		},
+	}
+
+	_, errUpdate := Icinga2_Server.UpdateHost(updateHost)
+	if errUpdate != nil {
+		t.Error(errUpdate)
+	}
+
+	// Delete host after creating it.
+	deleteErr := Icinga2_Server.DeleteHost(hostname)
+	if deleteErr != nil {
+		t.Error(deleteErr)
+	}
+
+}
+
 func TestCreateHostWithTemplates(t *testing.T) {
 	hostname := "go-icinga2-api-2"
 	IPAddress := "127.0.0.3"
