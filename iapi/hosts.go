@@ -75,6 +75,33 @@ func (server *Server) CreateHost(hostname, address, address6 string, checkComman
 
 }
 
+func (server *Server) UpdateHost(updatedHost HostStruct) ([]HostStruct, error) {
+
+	// Create JSON from updatedHost attrs field
+	payloadJSON, marshalErr := json.Marshal(map[string]interface{}{
+		"attrs": updatedHost.Attrs,
+	})
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	//fmt.Printf("<payload> %s\n", payloadJSON)
+
+	// Make the API request to create the hosts.
+	results, err := server.NewAPIRequest("POST", "/objects/hosts/"+updatedHost.Name, []byte(payloadJSON))
+	if err != nil {
+		return nil, err
+	}
+
+	if results.Code == 200 {
+		hosts, err := server.GetHost(updatedHost.Name)
+		return hosts, err
+	}
+
+	return nil, fmt.Errorf("%s", results.ErrorString)
+
+}
+
 // DeleteHost ...
 func (server *Server) DeleteHost(hostname string) error {
 	results, err := server.NewAPIRequest("DELETE", "/objects/hosts/"+hostname+"?cascade=1", nil)

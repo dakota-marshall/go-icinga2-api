@@ -11,4 +11,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add support for icinga's package config management endpoint via `CreatePackage`, `CreatePackageStage` methods
 - Add method to create an `Endpoint` and `Zone` object via the package endpoint
+- Added `*Update` methods for supported object types
 

@@ -30,9 +30,21 @@ func TestUser(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-
-			// Delete user after creating it.
-			err = icingaServer.DeleteUser(username)
+		})
+		t.Run("UpdateEmail", func(t *testing.T) {
+			newEmail := "email2@example.com"
+			user, err := icingaServer.GetUser("test-user-with-email")
+			user[0].Attrs.Email = newEmail
+			if err != nil {
+				t.Error(err)
+			}
+			_, updateErr := icingaServer.UpdateUser(user[0])
+			if updateErr != nil {
+				t.Error(updateErr)
+			}
+		})
+		t.Run("DeleteUser", func(t *testing.T) {
+			err := icingaServer.DeleteUser("test-user-with-email")
 			if err != nil {
 				t.Error(err)
 			}

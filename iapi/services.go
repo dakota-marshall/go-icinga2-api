@@ -61,6 +61,30 @@ func (server *Server) CreateService(servicename, hostname, checkCommand string, 
 	return nil, fmt.Errorf("%s", results.ErrorString)
 }
 
+func (server *Server) UpdateService(hostname string, servicename string, attrs ServiceAttrs) ([]ServiceStruct, error) {
+
+	// Create JSON from completed struct
+	payloadJSON, marshalErr := json.Marshal(map[string]interface{}{
+		"attrs": attrs,
+	})
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	// Make the API request to create the hosts.
+	results, err := server.NewAPIRequest("POST", "/objects/services/"+hostname+"!"+servicename, []byte(payloadJSON))
+	if err != nil {
+		return nil, err
+	}
+
+	if results.Code == 200 {
+		services, err := server.GetService(servicename, hostname)
+		return services, err
+	}
+
+	return nil, fmt.Errorf("%s", results.ErrorString)
+}
+
 // DeleteService ...
 func (server *Server) DeleteService(servicename, hostname string) error {
 	results, err := server.NewAPIRequest("DELETE", "/objects/services/"+hostname+"!"+servicename+"?cascade=1", nil)

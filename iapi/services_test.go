@@ -39,6 +39,19 @@ func TestServices(t *testing.T) {
 				t.Errorf("Error : Failed to create service %s!%s : %s", testHostName, servicename, err)
 			}
 		})
+		t.Run("UpdateService", func(t *testing.T) {
+			servicename := "ssh"
+			attrs := ServiceAttrs{
+				CheckCommand: "ssh",
+				Vars: map[string]string{
+					"test": "update",
+				},
+			}
+			_, err := icingaServer.UpdateService(testHostName, servicename, attrs)
+			if err != nil {
+				t.Errorf("Error : Failed to create service %s!%s : %s", testHostName, servicename, err)
+			}
+		})
 
 		t.Run("WithVariables", func(t *testing.T) {
 			servicename := "nrpe"
