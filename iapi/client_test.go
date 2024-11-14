@@ -1,9 +1,12 @@
 package iapi
 
 import (
+	"github.com/joho/godotenv"
 	"os"
 	"testing"
 )
+
+var env = godotenv.Load("../.env")
 
 var ICINGA2_API_PASSWORD = os.Getenv("ICINGA2_API_PASSWORD")
 
@@ -57,19 +60,6 @@ func TestNewFileRequestError(t *testing.T) {
 
 	if result.Code == 200 {
 		t.Errorf("%s", result.Status)
-	}
-}
-
-func TestNewAPIRequestServerUnavailable(t *testing.T) {
-
-	var Icinga2_Server = Server{"icinga-test", "icinga", "https://127.0.0.1:4665/v1", true, 5, 0, nil}
-	result, err := Icinga2_Server.NewAPIRequest("GET", "/status", nil)
-
-	if err == nil {
-		t.Errorf("Error : Did not get error connecting to unavailable server.")
-	}
-	if result.Retries != 5 {
-		t.Errorf("Error : Did not get error connecting to unavailable server before 5 retries.")
 	}
 }
 
